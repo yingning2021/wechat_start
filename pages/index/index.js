@@ -1,6 +1,7 @@
 // index.js
 // 获取应用实例
 const app = getApp()
+import { raceData} from './race_data'
 
 Page({
   data: {
@@ -22,10 +23,10 @@ Page({
       enableTraffic: false,
     },
     location: {
-      latitude: 31,
-      longitude: 120,
+      latitude: 29.756825521115363,
+      longitude: 121.87222114786053,
     },
-    scale: 10,
+    scale: 19,
     markers: [
       {
         iconPath: "/resources/car.png",
@@ -42,6 +43,14 @@ Page({
         longitude: 114.324520,
         width: 50,
         height: 50
+      },
+      {
+        iconPath: "/resources/car.png",
+        id: 2,
+        latitude: 29.756825521115363,
+        longitude: 121.87222114786053,
+        width: 20,
+        height: 20
       }
     ]
   },
@@ -51,37 +60,27 @@ Page({
       url: '../logs/logs?color=red'
     })
   },
+  pathIndex: 0,
+  translateMarker(ctx) {
+   this.pathIndex ++
+   if(this.pathIndex >= raceData.path.length){
+     return
+   }
+   ctx.translateMarker({
+     markerId: 2,
+     destination: {
+       latitude: raceData.path[this.pathIndex].lat,
+       longitude: raceData.path[this.pathIndex].lng,
+     },
+     duration: 10,
+     success: () => this.translateMarker(ctx)
+   })
+  },
+  onReady() {
+    const ctx = wx.createMapContext('map', this)
+    this.translateMarker(ctx)
+  },
   onLoad() {
-    if (wx.getUserProfile) {
-      this.setData({
-        canIUseGetUserProfile: true
-      })
-    }
+    console.log({raceData})
   },
-  getUserProfile(e) {
-    // 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
-    wx.getUserProfile({
-      desc: '展示用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-      success: (res) => {
-        console.log(res)
-        this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
-        })
-      }
-    })
-  },
-  getUserInfo(e) {
-    // 不推荐使用getUserInfo获取用户信息，预计自2021年4月13日起，getUserInfo将不再弹出弹窗，并直接返回匿名的用户个人信息
-    console.log(e)
-    this.setData({
-      userInfo: e.detail.userInfo,
-      hasUserInfo: true
-    })
-  },
-  onBtnTap() {
-    this.setData({
-      motto: "click down"
-    })
-  }
 })
